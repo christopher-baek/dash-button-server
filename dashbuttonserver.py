@@ -1,10 +1,12 @@
 import json
+import requests
 
 from scapy.all import *
 
 
 CONFIGURATION = None
 DASH_BUTTON_MACS = []
+IFTTT_URL_FORMAT = 'https://maker.ifttt.com/trigger/{event}/with/key/{key}'
 
 
 def main():
@@ -57,14 +59,30 @@ def handle_packet(packet):
 
 def do_wilson_jones_dash_button_action():
     print 'Wilson Jones Button Pushed'
+    execute_ifttt_event('wilson_jones_dash_button')
 
 
 def do_repurpose_dash_button_action():
     print 'Repurpose Button Pushed'
+    execute_ifttt_event('repurpose_dash_button')
 
 
 def do_the_laundress_dash_button_action():
     print 'The Laundress Button Pushed'
+    execute_ifttt_event('the_laundress_dash_button')
+
+
+def execute_ifttt_event(event_name):
+    print 'Executing IFTTT event', event_name
+
+    url = IFTTT_URL_FORMAT.format(event=event_name, key=CONFIGURATION['ifttt_key'])
+
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        print 'Request executed successfully'
+    else:
+        print 'Error executing request!'
 
 
 if __name__ == '__main__':
