@@ -1,7 +1,19 @@
 import json
+import logging
 import requests
 
 from scapy.all import *
+
+
+FORMATTER = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+CONSOLE_HANDLER = logging.StreamHandler()
+CONSOLE_HANDLER.setLevel(logging.DEBUG)
+CONSOLE_HANDLER.setFormatter(FORMATTER)
+
+LOGGER = logging.getLogger('dash-button-server')
+LOGGER.setLevel(logging.DEBUG)
+LOGGER.addHandler(CONSOLE_HANDLER)
 
 
 CONFIGURATION = None
@@ -18,7 +30,7 @@ def read_configuration(path):
     global CONFIGURATION
     global DASH_BUTTON_MACS
 
-    print 'Reading configuration'
+    LOGGER.info('Reading configuration')
 
     with open(path) as input_file:
         CONFIGURATION = json.load(input_file)
@@ -29,7 +41,7 @@ def read_configuration(path):
 def start_server():
     interface = CONFIGURATION['interface']
 
-    print 'Dash Button Server listening on', interface
+    LOGGER.info('Dash Button Server listening on {}'.format(interface))
 
     sniff(iface=str(interface), prn=handle_packet, filter='udp', lfilter=filter_dash_button_macs, store=0)
 
@@ -58,31 +70,31 @@ def handle_packet(packet):
 
 
 def do_wilson_jones_dash_button_action():
-    print 'Wilson Jones Button Pushed'
+    LOGGER.info('Wilson Jones Button Pushed')
     execute_ifttt_event('wilson_jones_dash_button')
 
 
 def do_repurpose_dash_button_action():
-    print 'Repurpose Button Pushed'
+    LOGGER.info('Repurpose Button Pushed')
     execute_ifttt_event('repurpose_dash_button')
 
 
 def do_the_laundress_dash_button_action():
-    print 'The Laundress Button Pushed'
+    LOGGER.info('The Laundress Button Pushed')
     execute_ifttt_event('the_laundress_dash_button')
 
 
 def execute_ifttt_event(event_name):
-    print 'Executing IFTTT event', event_name
+    LOGGER.info('Executing IFTTT event {}'.format(event_name))
 
     url = IFTTT_URL_FORMAT.format(event=event_name, key=CONFIGURATION['ifttt_key'])
 
     response = requests.get(url)
 
     if response.status_code == 200:
-        print 'Request executed successfully'
+        LOGGER.info('Request executed successfully')
     else:
-        print 'Error executing request!'
+        LOGGER.error('Error executing request!')
 
 
 if __name__ == '__main__':
