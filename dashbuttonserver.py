@@ -96,6 +96,9 @@ def execute_ifttt_event(event_name):
     else:
         LOGGER.error('Error executing request!')
 
+    LOGGER.debug('Response body')
+    LOGGER.debug(response.text)
+
 
 if __name__ == '__main__':
     main()
